@@ -43,6 +43,69 @@
             --text-muted: #888888;
         }
 
+        /* Custom Tooltip System */
+        .info-tip {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .info-tip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            top: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%) scale(0.95);
+            background: #0f172a;
+            color: #e2e8f0;
+            font-size: 11px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.45;
+            letter-spacing: 0;
+            text-transform: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            white-space: normal;
+            width: max-content;
+            max-width: 240px;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 9999;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+        }
+        .info-tip::before {
+            content: '';
+            position: absolute;
+            top: calc(100% + 2px);
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-bottom-color: #0f172a;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+            z-index: 9999;
+        }
+        .info-tip:hover::after,
+        .info-tip:hover::before {
+            opacity: 1;
+            transform: translateX(-50%) scale(1);
+        }
+        .info-tip:hover::before {
+            transform: translateX(-50%);
+        }
+        html.light .info-tip::after {
+            background: #1e293b;
+            color: #f1f5f9;
+            border-color: #475569;
+        }
+        html.light .info-tip::before {
+            border-bottom-color: #1e293b;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -2434,24 +2497,50 @@
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                     <div
                         class="bg-white dark:bg-slate-800 border dark:border-slate-700 border-slate-200 rounded-2xl p-5">
-                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Total Sites</p>
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Sites</p>
+                            <span class="info-tip" data-tooltip="Number of unique sites/locations active in this period">
+                                <svg class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </span>
+                        </div>
                         <p class="text-2xl font-black dark:text-white" id="ps-stat-employees">0</p>
                     </div>
                     <div
                         class="bg-white dark:bg-slate-800 border dark:border-slate-700 border-slate-200 rounded-2xl p-5">
-                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Products Sold
-                        </p>
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Products Sold</p>
+                            <span class="info-tip" data-tooltip="Total unique product lines (including variants) sold during this period">
+                                <svg class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </span>
+                        </div>
                         <p class="text-2xl font-black dark:text-white" id="ps-stat-products">0</p>
                     </div>
                     <div
                         class="bg-white dark:bg-slate-800 border dark:border-slate-700 border-slate-200 rounded-2xl p-5">
-                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Total Qty</p>
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Qty</p>
+                            <span class="info-tip" data-tooltip="Consolidated quantity of all items sold across all sites">
+                                <svg class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </span>
+                        </div>
                         <p class="text-2xl font-black dark:text-white" id="ps-stat-qty">0</p>
                     </div>
                     <div
                         class="bg-white dark:bg-slate-800 border dark:border-slate-700 border-slate-200 rounded-2xl p-5">
-                        <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Total Revenue
-                        </p>
+                        <div class="flex items-center justify-between mb-1">
+                            <p class="text-[10px] font-black uppercase tracking-widest text-slate-400">Total Revenue</p>
+                            <span class="info-tip" data-tooltip="Consolidated gross item sales revenue (excludes voided/scrapped items)">
+                                <svg class="w-3.5 h-3.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                            </span>
+                        </div>
                         <p class="text-2xl font-black text-emerald-500" id="ps-stat-revenue">R 0.00</p>
                     </div>
                 </div>
@@ -2468,12 +2557,12 @@
                         </select>
                         <select id="ps-sort" onchange="psCurrentPage = 1; psRenderTable()"
                             class="bg-white dark:bg-slate-800 border dark:border-slate-700 border-slate-200 rounded-xl px-4 py-2.5 text-sm dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/40">
+                            <option value="name-asc" selected>Name (A → Z)</option>
+                            <option value="name-desc">Name (Z → A)</option>
                             <option value="revenue-desc">Revenue (High → Low)</option>
                             <option value="revenue-asc">Revenue (Low → High)</option>
                             <option value="qty-desc">Quantity (High → Low)</option>
                             <option value="qty-asc">Quantity (Low → High)</option>
-                            <option value="name-asc">Name (A → Z)</option>
-                            <option value="name-desc">Name (Z → A)</option>
                         </select>
                     </div>
                     <div class="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
@@ -2517,22 +2606,70 @@
                                     </th>
                                     <th
                                         class="px-6 py-4 font-black uppercase text-[10px] tracking-widest text-slate-500">
-                                        Product</th>
+                                        <div class="flex items-center gap-1.5">
+                                            <span>Product</span>
+                                            <span class="info-tip" data-tooltip="The product name, including specific variants or option sizes">
+                                                <svg class="w-3 h-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </th>
                                     <th
                                         class="px-6 py-4 font-black uppercase text-[10px] tracking-widest text-slate-500">
-                                        Site</th>
+                                        <div class="flex items-center gap-1.5">
+                                            <span>Site</span>
+                                            <span class="info-tip" data-tooltip="The sales locations for this product (expand row to view breakout per site)">
+                                                <svg class="w-3 h-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </th>
                                     <th
                                         class="px-6 py-4 font-black uppercase text-[10px] tracking-widest text-slate-500 text-right">
-                                        Total Qty</th>
+                                        <div class="flex items-center gap-1.5 justify-end">
+                                            <span>Total Qty</span>
+                                            <span class="info-tip" data-tooltip="The total quantity of this product variant sold during this period">
+                                                <svg class="w-3 h-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </th>
                                     <th
                                         class="px-6 py-4 font-black uppercase text-[10px] tracking-widest text-slate-500 text-right">
-                                        Revenue</th>
+                                        <div class="flex items-center gap-1.5 justify-end">
+                                            <span>Revenue</span>
+                                            <span class="info-tip" data-tooltip="The total gross revenue earned from sales of this item variant">
+                                                <svg class="w-3 h-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </th>
                                     <th
                                         class="px-6 py-4 font-black uppercase text-[10px] tracking-widest text-slate-500 text-right">
-                                        Unit Price</th>
+                                        <div class="flex items-center gap-1.5 justify-end">
+                                            <span>Unit Price</span>
+                                            <span class="info-tip" data-tooltip="The calculated average price per unit (Total Revenue / Quantity)">
+                                                <svg class="w-3 h-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </th>
                                     <th
                                         class="px-6 py-4 font-black uppercase text-[10px] tracking-widest text-slate-500">
-                                        Top Site Per Product</th>
+                                        <div class="flex items-center gap-1.5">
+                                            <span>Top Site Per Product</span>
+                                            <span class="info-tip" data-tooltip="The location that generated the highest revenue for this product variant">
+                                                <svg class="w-3 h-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                </svg>
+                                            </span>
+                                        </div>
+                                    </th>
                                 </tr>
                             </thead>
                             <tbody id="ps-table-body" class="divide-y dark:divide-slate-700"></tbody>
@@ -4550,7 +4687,24 @@
             psData = {};
             const allSites = new Set();
             items.forEach(item => {
-                const product = item['Product'] || item['Product Name'] || item['Item'] || 'Unknown Product';
+                const rawProduct = item['Product'] || item['Product Name'] || item['Item'] || 'Unknown Product';
+                
+                // Get Variant / Option information
+                let variantStr = '';
+                const variantVal = (item['Variant'] || item['Variant Name'] || item['Option'] || item['Option Name'] || item['Variant Name (Optional)'] || '').trim();
+                const variantGroup = (item['Variant Group'] || item['Option Group'] || item['Option Name'] || '').trim();
+
+                if (variantVal && variantVal !== '-' && variantVal.toLowerCase() !== 'no variant') {
+                    if (variantVal.includes(':')) {
+                        variantStr = variantVal;
+                    } else if (variantGroup && variantGroup !== '-' && variantGroup.toLowerCase() !== 'no variant') {
+                        variantStr = `${variantGroup}: ${variantVal}`;
+                    } else {
+                        variantStr = variantVal;
+                    }
+                }
+                
+                const product = variantStr ? `${rawProduct} ( ${variantStr} )` : rawProduct;
                 const site = item['Site'] || 'Unknown Site';
                 const qty = parseFloat(item['Quantity'] || item['Qty'] || 1);
                 const total = parseFloat(item['Item Total'] || item['Total'] || item['Amount'] || 0);
@@ -4558,7 +4712,7 @@
 
                 if (status === 'voided' || status === 'void' || status === 'scrapped') return;
 
-                if (!psData[product]) psData[product] = { sites: {}, totalQty: 0, totalRevenue: 0 };
+                if (!psData[product]) psData[product] = { rawProduct, variantStr, sites: {}, totalQty: 0, totalRevenue: 0 };
                 if (!psData[product].sites[site]) psData[product].sites[site] = { qty: 0, revenue: 0 };
 
                 psData[product].sites[site].qty += qty;
@@ -4608,7 +4762,7 @@
                     sitesToDisplay = d.sites;
                 }
 
-                return { name, sites: sitesToDisplay, displayQty, displayRevenue };
+                return { name, rawProduct: d.rawProduct, variantStr: d.variantStr, sites: sitesToDisplay, displayQty, displayRevenue };
             }).filter(Boolean);
 
             // Global Stats update based on filter
@@ -4638,7 +4792,21 @@
             entries.sort((a, b) => {
                 if (key === 'revenue') return dir === 'desc' ? b.displayRevenue - a.displayRevenue : a.displayRevenue - b.displayRevenue;
                 if (key === 'qty') return dir === 'desc' ? b.displayQty - a.displayQty : a.displayQty - b.displayQty;
-                return dir === 'desc' ? b.name.localeCompare(a.name) : a.name.localeCompare(b.name);
+                
+                // Keep same products grouped together, sorting sizes in rank order (Small -> Medium -> Large)
+                const nameA = (a.rawProduct || '').toLowerCase();
+                const nameB = (b.rawProduct || '').toLowerCase();
+                if (nameA !== nameB) {
+                    return dir === 'desc' ? nameB.localeCompare(nameA) : nameA.localeCompare(nameB);
+                }
+                const rankA = psGetSizeRank(a.variantStr);
+                const rankB = psGetSizeRank(b.variantStr);
+                if (rankA !== rankB) {
+                    return dir === 'desc' ? rankB - rankA : rankA - rankB;
+                }
+                const varA = (a.variantStr || '').toLowerCase();
+                const varB = (b.variantStr || '').toLowerCase();
+                return dir === 'desc' ? varB.localeCompare(varA) : varA.localeCompare(varB);
             });
 
             const totalRows = entries.length;
@@ -4697,11 +4865,32 @@
         let psCurrentPage = 1;
         let psRowsPerPage = 10;
 
+        function psGetSizeRank(variant) {
+            if (!variant) return 0;
+            const v = variant.toLowerCase();
+            if (v.includes('extra small') || v.includes('x-small') || v.includes('xsmall') || v.includes('xs')) return 1;
+            if (v.includes('small') || v.includes(' s ') || v.endsWith(' s') || v.startsWith('s ')) return 2;
+            if (v.includes('medium') || v.includes(' m ') || v.endsWith(' m') || v.startsWith('m ')) return 3;
+            if (v.includes('large') || v.includes(' l ') || v.endsWith(' l') || v.startsWith('l ')) return 4;
+            if (v.includes('extra large') || v.includes('x-large') || v.includes('xlarge') || v.includes('xl')) return 5;
+            return 99;
+        }
+
         function psExportExcel() {
             const rows = [];
             const siteFilter = document.getElementById('ps-employee-filter').value;
 
-            Object.entries(psData).sort((a, b) => b[1].totalRevenue - a[1].totalRevenue).forEach(([prod, d]) => {
+            const sortedEntries = Object.entries(psData).sort((a, b) => {
+                const nameA = (a[1].rawProduct || '').toLowerCase();
+                const nameB = (b[1].rawProduct || '').toLowerCase();
+                if (nameA !== nameB) return nameA.localeCompare(nameB);
+                const rankA = psGetSizeRank(a[1].variantStr);
+                const rankB = psGetSizeRank(b[1].variantStr);
+                if (rankA !== rankB) return rankA - rankB;
+                return (a[1].variantStr || '').toLowerCase().localeCompare((b[1].variantStr || '').toLowerCase());
+            });
+
+            sortedEntries.forEach(([prod, d]) => {
                 Object.entries(d.sites).sort((a, b) => b[1].revenue - a[1].revenue).forEach(([site, p]) => {
                     if (siteFilter && site !== siteFilter) return;
                     rows.push({
@@ -4794,7 +4983,15 @@
             });
             y += 26;
 
-            const sorted = entries.sort((a, b) => b.revenue - a.revenue);
+            const sorted = entries.sort((a, b) => {
+                const nameA = (a.rawProduct || '').toLowerCase();
+                const nameB = (b.rawProduct || '').toLowerCase();
+                if (nameA !== nameB) return nameA.localeCompare(nameB);
+                const rankA = psGetSizeRank(a.variantStr);
+                const rankB = psGetSizeRank(b.variantStr);
+                if (rankA !== rankB) return rankA - rankB;
+                return (a.variantStr || '').toLowerCase().localeCompare((b.variantStr || '').toLowerCase());
+            });
             sorted.forEach((prod) => {
                 const sites = Object.entries(prod.sites).sort((a, b) => b[1].revenue - a[1].revenue);
                 const neededHeight = 22 + (siteFilter ? 0 : sites.length * 6);
