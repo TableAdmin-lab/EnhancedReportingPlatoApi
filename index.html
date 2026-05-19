@@ -2121,6 +2121,10 @@
             <div id="apiFetchSection" style="display:none;margin-top:1rem;">
                 <div class="api-field">
                     <label>Sites (all selected by default)</label>
+                    <div style="margin-bottom:0.4rem;">
+                        <input type="text" id="apiSiteSearch" oninput="apiFilterSites(this.value)" placeholder="Search sites..." 
+                            style="width:100%;padding:0.5rem 0.7rem;font-size:0.75rem;border-radius:0.4rem;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#fff;outline:none;" />
+                    </div>
                     <div style="display:flex;gap:0.4rem;margin-bottom:0.3rem;">
                         <button type="button" class="api-btn"
                             style="padding:0.3rem 0.7rem;font-size:0.6rem;background:rgba(255,255,255,0.06);color:var(--text-muted);border:1px solid rgba(255,255,255,0.1);transition:all 0.3s;"
@@ -2778,20 +2782,21 @@
                          </div>
                      </div>
                      <div class="overflow-x-auto">
-                         <table class="w-full text-left text-sm">
+                         <table class="w-full text-left text-sm table-fixed">
                              <thead class="bg-slate-50 dark:bg-slate-900/50 border-b dark:border-slate-700">
                                  <tr>
-                                     <th class="px-6 py-5 w-12 text-center">
+                                     <th class="px-2 py-4 w-10 text-center">
                                          <input type="checkbox" id="roy-select-all" onchange="royToggleSelectAll(this.checked)" class="rounded border-slate-300 text-amber-500 focus:ring-amber-500 dark:bg-slate-800">
                                      </th>
-                                     <th class="px-8 py-5 font-black uppercase text-[10px] tracking-widest text-slate-500">Site Name</th>
-                                     <th class="px-8 py-5 font-black uppercase text-[10px] tracking-widest text-slate-500 text-right">Transactions</th>
-                                     <th class="px-8 py-5 font-black uppercase text-[10px] tracking-widest text-slate-500 text-right">Gross Sales</th>
-                                     <th class="px-8 py-5 font-black uppercase text-[10px] tracking-widest text-slate-500 text-right">Net Sales</th>
-                                     <th class="px-8 py-5 font-black uppercase text-[10px] tracking-widest text-slate-500 text-right">% Rate</th>
-                                     <th class="px-8 py-5 font-black uppercase text-[10px] tracking-widest text-amber-500 text-right">Royalty (Excl)</th>
-                                     <th class="px-8 py-5 font-black uppercase text-[10px] tracking-widest text-rose-500 text-right">Royalty Discount</th>
-                                     <th class="px-8 py-5 font-black uppercase text-[10px] tracking-widest text-amber-600 text-right bg-amber-500/5">Royalty (Incl)</th>
+                                     <th class="px-3 py-4 font-black uppercase text-[10px] tracking-widest text-slate-500 w-[18%]">Site Name</th>
+                                     <th class="px-3 py-4 font-black uppercase text-[10px] tracking-widest text-slate-500 text-right w-[8%]">Txns</th>
+                                     <th class="px-3 py-4 font-black uppercase text-[10px] tracking-widest text-slate-500 text-right w-[11%]">Gross</th>
+                                     <th class="px-3 py-4 font-black uppercase text-[10px] tracking-widest text-slate-500 text-right w-[11%]">Net Sales</th>
+                                     <th class="px-3 py-4 font-black uppercase text-[10px] tracking-widest text-slate-500 text-right w-[8%]">% Rate</th>
+                                     <th class="px-3 py-4 font-black uppercase text-[10px] tracking-widest text-amber-500 text-right w-[11%]">Royalty Excl</th>
+                                     <th class="px-3 py-4 font-black uppercase text-[10px] tracking-widest text-rose-500 text-right w-[8%]">Disc %</th>
+                                     <th class="px-3 py-4 font-black uppercase text-[10px] tracking-widest text-amber-600 text-right bg-amber-500/5 w-[11%]">Royalty Incl</th>
+                                     <th class="px-2 py-4 font-black uppercase text-[10px] tracking-widest text-slate-500 text-center w-[14%]">Capped</th>
                                  </tr>
                              </thead>
                              <tbody id="roy-table-body" class="divide-y dark:divide-slate-700"></tbody>
@@ -3449,6 +3454,42 @@
         function lockScroll() { document.body.style.overflow = 'hidden'; }
         function unlockScroll() { document.body.style.overflow = ''; }
 
+        function salesShowInfo(type) {
+            const modal = document.getElementById('sales-info-modal');
+            const title = document.getElementById('sales-info-title');
+            const content = document.getElementById('sales-info-content');
+
+            const infoData = {
+                'gross': { title: 'Gross Sales', content: 'The total value of all sales before any discounts, refunds, or tax deductions.' },
+                'vat': { title: 'Total VAT', content: 'Value Added Tax calculated on the gross sales, excluding exempt items.' },
+                'discounts': { title: 'Discounts', content: 'Total value of all discounts applied to bills, including Munch and manual discounts.' },
+                'refunds': { title: 'Refunds', content: 'Total value of items or bills that have been refunded to the customer.' },
+                'voids': { title: 'Voids', content: 'Total value of items removed from bills before payment was completed.' },
+                'tips': { title: 'Tips', content: 'Total gratuity added to the bills by customers.' },
+                'net': { title: 'Net Sales', content: 'Gross Sales minus Discounts and Refunds. Represents the actual revenue earned.' },
+                'hourly': { title: 'Hourly Activity', content: 'Shows the distribution of transaction volume across different hours of the day.' },
+                'payments': { title: 'Payment Methods', content: 'Breakdown of the different payment types used (Card, Cash, etc.) and their total values.' },
+                'site': { title: 'Site Distribution', content: 'Compares the net sales performance across all your different locations.' },
+                'efficiency': { title: 'Processing Efficiency', content: 'Measures how quickly transactions are being processed and closed.' },
+                'closed-total': { title: 'Closed Total', content: 'The final settled amount expected in the bank, calculated as Gross Sales - Discounts - Refunds.' },
+                'matrix': { title: 'Employee Matrix', content: 'Detailed performance breakdown per employee, including their individual sales, tips, voids, and discounts.' },
+                'opentables': { title: 'Open Tables', content: 'Current active tables that have items ordered but have not yet been settled.' },
+                'audit': { title: 'Audit Log', content: 'Chronological record of all transactions with detailed status and financial information.' }
+            };
+
+            if (infoData[type]) {
+                title.textContent = infoData[type].title;
+                content.textContent = infoData[type].content;
+                modal.classList.remove('hidden');
+                lockScroll();
+            }
+        }
+
+        function salesCloseInfoModal() {
+            document.getElementById('sales-info-modal').classList.add('hidden');
+            unlockScroll();
+        }
+
         // ═══════════════════════════════════════════
         // ═══ SPA ROUTER ═══
         // ═══════════════════════════════════════════
@@ -3635,6 +3676,19 @@
         function closeApiModal() {
             document.getElementById('apiModal').classList.remove('show');
             unlockScroll();
+        }
+
+        function apiFilterSites(term) {
+            const sel = document.getElementById('apiSiteSelect');
+            const lowerTerm = term.toLowerCase();
+            for (let i = 0; i < sel.options.length; i++) {
+                const opt = sel.options[i];
+                if (!opt.disabled) {
+                    const matches = opt.text.toLowerCase().includes(lowerTerm);
+                    opt.hidden = !matches;
+                    opt.style.display = matches ? '' : 'none';
+                }
+            }
         }
 
         function apiSelectAllSites(btn) {
@@ -4169,6 +4223,11 @@
             salesRenderOpenTables(salesFilteredTransactions);
             salesRenderSiteMatrix(salesFilteredTransactions);
             salesRenderTransactions();
+
+            const pdfBtn = document.getElementById('sales-pdf-export-btn');
+            if (pdfBtn) {
+                pdfBtn.disabled = salesFilteredTransactions.length === 0;
+            }
         }
 
         function salesSetSiteFilter(site) {
@@ -5460,17 +5519,20 @@
             const defaultPercent = parseFloat(document.getElementById('roy-percent-input').value || 10);
             sales.forEach(tx => {
                 const site = tx['Site'] || 'Unknown Site';
-                // Support multiple possible header names for Gross and Net sales
                 const gross = parseFloat(tx['Gross Sale Amount'] || tx['Gross Sales'] || tx['Bill Total'] || tx['gross'] || tx['Amount'] || 0);
                 const net = parseFloat(tx['Net Sale Amount'] || tx['Net Sales'] || tx['net'] || tx['Total'] || 0);
                 const status = (tx['Status'] || tx['status'] || '').toLowerCase();
 
                 if (status === 'voided' || status === 'refunded' || status === 'void') return;
 
-                if (!royData[site]) royData[site] = { gross: 0, net: 0, count: 0, manualDiscount: 0, percent: defaultPercent, selected: false };
+                if (!royData[site]) royData[site] = { gross: 0, net: 0, count: 0, discountPercent: 0, percent: defaultPercent, selected: false, capped: false, cappedAmount: 0 };
                 royData[site].gross += gross;
                 royData[site].net += net;
                 royData[site].count += 1;
+            });
+            // Auto-set royalty % to 0 for sites below R125,000 net sales
+            Object.values(royData).forEach(data => {
+                if (data.net < 125000) data.percent = 0;
             });
             royUpdateCalculations();
         }
@@ -5513,8 +5575,7 @@
                 filteredCount++;
                 filteredSites.push([name, data]);
 
-                const royaltyBase = data.net;
-                const royaltyExcl = royaltyBase * (data.percent / 100);
+                const royaltyExcl = data.capped ? data.cappedAmount : data.net * (data.percent / 100);
                 totalNet += data.net;
                 totalRoyalty += royaltyExcl;
             });
@@ -5529,38 +5590,52 @@
 
             tbody.innerHTML = '';
             pagedSites.forEach(([name, data]) => {
-                const royaltyBase = data.net;
-                const royaltyExcl = royaltyBase * (data.percent / 100);
-                const royaltyIncl = (royaltyExcl - data.manualDiscount) * 1.15;
+                const royaltyExcl = data.capped ? data.cappedAmount : data.net * (data.percent / 100);
+                const discountAmount = royaltyExcl * (data.discountPercent / 100);
+                const royaltyIncl = (royaltyExcl - discountAmount) * 1.15;
+                const belowThreshold = data.net < 125000;
 
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors border-b dark:border-slate-700 last:border-0';
                 tr.innerHTML = `
-                    <td class="px-6 py-5 w-12 text-center">
+                    <td class="px-2 py-3 w-10 text-center">
                         <input type="checkbox" ${data.selected ? 'checked' : ''} onchange="royData['${name.replace(/'/g, "\\'")}'].selected = this.checked" class="rounded border-slate-300 text-amber-500 focus:ring-amber-500 dark:bg-slate-800">
                     </td>
-                    <td class="px-8 py-5 font-bold dark:text-white">${name}</td>
-                    <td class="px-8 py-5 text-right text-slate-500 dark:text-slate-400 font-medium">${data.count.toLocaleString()}</td>
-                    <td class="px-8 py-5 text-right text-slate-500 dark:text-slate-400 font-medium">R ${data.gross.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</td>
-                    <td class="px-8 py-5 text-right font-semibold dark:text-white">R ${data.net.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</td>
-                    <td class="px-8 py-5 text-right">
+                    <td class="px-3 py-3 font-bold dark:text-white text-xs truncate">
+                        ${name}
+                        ${belowThreshold ? '<span class="ml-1 inline-flex items-center bg-slate-100 dark:bg-slate-700 text-slate-500 dark:text-slate-400 text-[8px] font-bold uppercase px-1 py-0.5 rounded">< R125k</span>' : ''}
+                    </td>
+                    <td class="px-3 py-3 text-right text-slate-500 dark:text-slate-400 font-medium text-xs">${data.count.toLocaleString()}</td>
+                    <td class="px-3 py-3 text-right text-slate-500 dark:text-slate-400 font-medium text-xs">R ${data.gross.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</td>
+                    <td class="px-3 py-3 text-right font-semibold dark:text-white text-xs">R ${data.net.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</td>
+                    <td class="px-3 py-3 text-right">
                         <div class="flex items-center justify-end gap-1">
                             <input type="number" value="${data.percent}" step="0.5" min="0" max="100" 
                                 onchange="royUpdateSitePercent('${name.replace(/'/g, "\\'")}', this.value)"
-                                class="w-16 bg-white dark:bg-slate-900 border dark:border-slate-700 border-slate-200 rounded-lg px-2 py-1 text-right font-bold text-xs focus:ring-1 focus:ring-amber-500 outline-none">
+                                class="w-14 bg-white dark:bg-slate-900 border dark:border-slate-700 border-slate-200 rounded-lg px-1.5 py-1 text-right font-bold text-xs focus:ring-1 focus:ring-amber-500 outline-none ${data.capped ? 'opacity-40' : ''}" ${data.capped ? 'disabled' : ''}>
                             <span class="text-[10px] font-bold text-slate-400">%</span>
                         </div>
                     </td>
-                    <td class="px-8 py-5 text-right font-black text-amber-500">R ${royaltyExcl.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</td>
-                    <td class="px-8 py-5 text-right">
+                    <td class="px-3 py-3 text-right font-black text-amber-500 text-xs">R ${royaltyExcl.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</td>
+                    <td class="px-3 py-3 text-right">
                         <div class="flex items-center justify-end gap-1">
-                            <span class="text-[10px] font-bold text-slate-400">R</span>
-                            <input type="number" value="${data.manualDiscount}" step="10" min="0"
-                                onchange="royUpdateManualDiscount('${name.replace(/'/g, "\\'")}', this.value)"
-                                class="w-20 bg-white dark:bg-slate-900 border dark:border-slate-700 border-slate-200 rounded-lg px-2 py-1 text-right font-bold text-xs text-rose-500 focus:ring-1 focus:ring-rose-500 outline-none">
+                            <input type="number" value="${data.discountPercent}" step="0.5" min="0" max="100"
+                                onchange="royUpdateDiscountPercent('${name.replace(/'/g, "\\'")}', this.value)"
+                                class="w-14 bg-white dark:bg-slate-900 border dark:border-slate-700 border-slate-200 rounded-lg px-1.5 py-1 text-right font-bold text-xs text-rose-500 focus:ring-1 focus:ring-rose-500 outline-none">
+                            <span class="text-[10px] font-bold text-slate-400">%</span>
                         </div>
                     </td>
-                    <td class="px-8 py-5 text-right font-black text-amber-600 bg-amber-500/5">R ${royaltyIncl.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</td>
+                    <td class="px-3 py-3 text-right font-black text-amber-600 bg-amber-500/5 text-xs">R ${royaltyIncl.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')}</td>
+                    <td class="px-2 py-3 text-center">
+                        <div class="flex items-center justify-center gap-1.5">
+                            <button onclick="royToggleCapped('${name.replace(/'/g, "\\'")}')" class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors flex-shrink-0 ${data.capped ? 'bg-amber-500' : 'bg-slate-300 dark:bg-slate-600'}">
+                                <span class="inline-block h-3.5 w-3.5 rounded-full bg-white shadow transform transition-transform ${data.capped ? 'translate-x-4' : 'translate-x-0.5'}"></span>
+                            </button>
+                            ${data.capped ? `<input type="number" value="${data.cappedAmount}" step="100" min="0"
+                                onchange="royUpdateCappedAmount('${name.replace(/'/g, "\\'")}', this.value)"
+                                class="w-20 bg-amber-50 dark:bg-amber-900/20 border border-amber-300 dark:border-amber-700 rounded-lg px-1.5 py-1 text-right font-bold text-xs text-amber-600 dark:text-amber-400 focus:ring-1 focus:ring-amber-500 outline-none" placeholder="Amt">` : ''}
+                        </div>
+                    </td>
                 `;
                 tbody.appendChild(tr);
             });
@@ -5580,58 +5655,81 @@
             }
         }
 
-        function royUpdateManualDiscount(siteName, val) {
+        function royUpdateDiscountPercent(siteName, val) {
             if (royData[siteName]) {
-                royData[siteName].manualDiscount = parseFloat(val || 0);
+                royData[siteName].discountPercent = parseFloat(val || 0);
+                royUpdateCalculations();
+            }
+        }
+
+        function royToggleCapped(siteName) {
+            if (royData[siteName]) {
+                royData[siteName].capped = !royData[siteName].capped;
+                if (royData[siteName].capped && royData[siteName].cappedAmount === 0) {
+                    // Pre-fill with current calculated royalty
+                    royData[siteName].cappedAmount = parseFloat((royData[siteName].net * (royData[siteName].percent / 100)).toFixed(2));
+                }
+                royUpdateCalculations();
+            }
+        }
+
+        function royUpdateCappedAmount(siteName, val) {
+            if (royData[siteName]) {
+                royData[siteName].cappedAmount = parseFloat(val || 0);
                 royUpdateCalculations();
             }
         }
 
         function royExportExcel() {
             const sortedEntries = Object.entries(royData).sort((a, b) => b[1].net - a[1].net);
-            const rows = sortedEntries.map(([name, data]) => ({
-                'Site Name': name,
-                'Type': '',
-                'Transactions': data.count,
-                'Gross Sales': parseFloat(data.gross.toFixed(2)),
-                'Net Sales': parseFloat(data.net.toFixed(2)),
-                'Royalty %': data.percent,
-                'Royalty (Excl)': parseFloat(((data.net) * (data.percent / 100)).toFixed(2)),
-                'Royalty Discount': data.manualDiscount,
-                'Royalty (Incl)': parseFloat(((data.net - data.manualDiscount) * (data.percent / 100) * 1.15).toFixed(2))
-            }));
+            const rows = sortedEntries.map(([name, data]) => {
+                const royaltyExcl = data.capped ? data.cappedAmount : data.net * (data.percent / 100);
+                const discountAmount = royaltyExcl * (data.discountPercent / 100);
+                const royaltyIncl = (royaltyExcl - discountAmount) * 1.15;
+                return {
+                    'Site Name': name,
+                    'Type': '',
+                    'Transactions': data.count,
+                    'Gross Sales': parseFloat(data.gross.toFixed(2)),
+                    'Net Sales': parseFloat(data.net.toFixed(2)),
+                    'Royalty %': data.percent,
+                    'Royalty (Excl)': parseFloat(royaltyExcl.toFixed(2)),
+                    'Discount %': data.discountPercent,
+                    'Royalty (Incl)': parseFloat(royaltyIncl.toFixed(2)),
+                    'Capped': data.capped ? 'Yes' : 'No'
+                };
+            });
 
             if (!rows.length) return;
             const ws = XLSX.utils.json_to_sheet(rows);
 
             // Add Formulas for Royalty Amount
-            // Column E is Net Sales, Column F is Royalty %, Column H is Royalty Discount
-            rows.forEach((_, i) => {
-                const rowIdx = i + 2; // +1 for header, +1 for 1-indexing
+            rows.forEach((row, i) => {
+                const rowIdx = i + 2;
                 const exclRef = 'G' + rowIdx;
                 const inclRef = 'I' + rowIdx;
-                if (ws[exclRef]) {
+                // Only add formula if NOT capped
+                if (ws[exclRef] && row['Capped'] !== 'Yes') {
                     ws[exclRef].f = `E${rowIdx}*(F${rowIdx}/100)`;
                 }
                 if (ws[inclRef]) {
-                    ws[inclRef].f = `(G${rowIdx}-H${rowIdx})*1.15`;
+                    ws[inclRef].f = `(G${rowIdx}-(G${rowIdx}*(H${rowIdx}/100)))*1.15`;
                 }
             });
 
             // Add Total Row
             const totalRowIdx = rows.length + 2;
-            XLSX.utils.sheet_add_aoa(ws, [['TOTALS', '', '', '', '', '', '', '', '']], { origin: `A${totalRowIdx}` });
+            XLSX.utils.sheet_add_aoa(ws, [['TOTALS', '', '', '', '', '', '', '', '', '']], { origin: `A${totalRowIdx}` });
             
             // Formulas for Totals
             ws['C' + totalRowIdx] = { f: `SUM(C2:C${totalRowIdx - 1})`, t: 'n' };
             ws['D' + totalRowIdx] = { f: `SUM(D2:D${totalRowIdx - 1})`, t: 'n', z: '"R "#,##0.00' };
             ws['E' + totalRowIdx] = { f: `SUM(E2:E${totalRowIdx - 1})`, t: 'n', z: '"R "#,##0.00' };
             ws['G' + totalRowIdx] = { f: `SUM(G2:G${totalRowIdx - 1})`, t: 'n', z: '"R "#,##0.00' };
-            ws['H' + totalRowIdx] = { f: `SUM(H2:H${totalRowIdx - 1})`, t: 'n', z: '"R "#,##0.00' };
             ws['I' + totalRowIdx] = { f: `SUM(I2:I${totalRowIdx - 1})`, t: 'n', z: '"R "#,##0.00' };
             
             // Styling columns
-            ws['!cols'] = [{ wch: 35 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 18 }, { wch: 18 }, { wch: 20 }];
+            ws['!cols'] = [{ wch: 35 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 18 }, { wch: 12 }, { wch: 20 }, { wch: 10 }];
             
             // Add Data Validation for the Type column (Column B)
             if(!ws['!dataValidation']) ws['!dataValidation'] = [];
@@ -5692,10 +5790,10 @@
 
                     // Alignments & Number Formatting
                     if (R > 0) {
-                        if (C >= 3 && C !== 5) {
+                        if (C >= 3 && C !== 5 && C !== 7 && C !== 9) {
                             ws[cellRef].s.alignment.horizontal = "right";
                             if (R < totalRowIdx - 1 && !ws[cellRef].z) ws[cellRef].z = '"R "#,##0.00';
-                        } else if (C === 5) {
+                        } else if (C === 5 || C === 7) {
                             ws[cellRef].s.alignment.horizontal = "right";
                         } else if (C === 2) {
                             ws[cellRef].s.alignment.horizontal = "center";
@@ -5726,20 +5824,25 @@
             doc.setTextColor(148, 163, 184);
             doc.text(`Generated on ${new Date().toLocaleDateString()}  |  Multi-Site Royalty Report`, 14, 30);
 
-            const body = Object.entries(royData).sort((a, b) => b[1].net - a[1].net).map(([name, data]) => [
-                name,
-                data.count.toLocaleString(),
-                'R ' + data.gross.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','),
-                'R ' + data.net.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','),
-                data.percent + '%',
-                'R ' + (data.net * (data.percent / 100)).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','),
-                'R ' + data.manualDiscount.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','),
-                'R ' + ((data.net * (data.percent / 100) - data.manualDiscount) * 1.15).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
-            ]);
+            const body = Object.entries(royData).sort((a, b) => b[1].net - a[1].net).map(([name, data]) => {
+                const royaltyExcl = data.capped ? data.cappedAmount : data.net * (data.percent / 100);
+                const discountAmount = royaltyExcl * (data.discountPercent / 100);
+                const royaltyIncl = (royaltyExcl - discountAmount) * 1.15;
+                return [
+                    name + (data.capped ? ' [C]' : ''),
+                    data.count.toLocaleString(),
+                    'R ' + data.gross.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+                    'R ' + data.net.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+                    data.percent + '%',
+                    'R ' + royaltyExcl.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+                    data.discountPercent + '%',
+                    'R ' + royaltyIncl.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',')
+                ];
+            });
 
             doc.autoTable({
                 startY: 50,
-                head: [['Site Name', 'Transactions', 'Gross', 'Net', 'Rate %', 'Royalty Excl', 'Discount', 'Royalty Incl']],
+                head: [['Site Name', 'Transactions', 'Gross', 'Net', 'Rate %', 'Royalty Excl', 'Discount %', 'Royalty Incl']],
                 body: body,
                 theme: 'grid',
                 headStyles: { fillColor: [245, 158, 11], textColor: 255, fontStyle: 'bold' },
@@ -5758,7 +5861,10 @@
             // Summary Stats
             const finalY = doc.lastAutoTable.finalY + 15;
             const totalNet = Object.values(royData).reduce((s, v) => s + v.net, 0);
-            const totalRoy = totalNet * (percent / 100);
+            const totalRoy = Object.values(royData).reduce((s, v) => {
+                const excl = v.capped ? v.cappedAmount : v.net * (v.percent / 100);
+                return s + excl;
+            }, 0);
 
             doc.setFillColor(248, 250, 252);
             doc.roundedRect(130, finalY, 66, 30, 2, 2, 'F');
